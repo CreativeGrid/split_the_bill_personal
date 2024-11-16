@@ -1,6 +1,12 @@
-import moment from "moment";
+interface doGetEvent {
+  queryString: string;
+  parameter: { [key: string]: string };
+  parameters: { [key: string]: string[] };
+  contextPath: string;
+  contentLength: number;
+  pathInfo: string;
+}
 
-const main = () => {
-  const now = moment();
-  Logger.log(now.format());
-};
+function doGet(e: doGetEvent) {
+  return ContentService.createTextOutput("hello. gas!");
+}

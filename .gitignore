@@ -2,3 +2,5 @@ node_modules/
 
 # clapsにプッシュするためのJavaScriptコード
 dist/*.js
+
+.env
