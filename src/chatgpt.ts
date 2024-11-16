@@ -1,5 +1,3 @@
-import dotenv from "dotenv";
-
 interface Payload {
   model: string;
   prompt: string;
@@ -26,13 +24,14 @@ interface GPTResponse {
 }
 
 function callChatGPT(prompt: string): string {
-  dotenv.config();
+  const propetiesService = PropertiesService;
+  const scriptProperties = propetiesService.getScriptProperties();
+  const apiKey = scriptProperties.getProperty("OPENAI_API_KEY");
+
   const url = "https://api.openai.com/v1/completions";
 
-  const apiKey = process.env.OPENAI_API_KEY;
-
   const payload: Payload = {
-    model: "text-davinci-003",
+    model: "gpt-4",
     prompt: prompt,
     max_tokens: 150,
     temperature: 0.7,
@@ -65,7 +64,8 @@ function callChatGPT(prompt: string): string {
  * @param prompt
  * @returns
  */
-export function testChatGPT(prompt: string) {
+export function testChatGPT() {
+  const prompt = "これから全てのレスポンスはjsonで返して欲しいです。";
   const response = callChatGPT(prompt);
   Logger.log(response);
 }

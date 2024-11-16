@@ -1,3 +1,5 @@
+import { testChatGPT } from "./chatgpt";
+
 interface doGetEvent {
   queryString: string;
   parameter: { [key: string]: string };
@@ -8,5 +10,5 @@ interface doGetEvent {
 }
 
 function doGet(e: doGetEvent) {
-  return ContentService.createTextOutput("hello. gas!");
+  return testChatGPT();
 }
