@@ -3,6 +3,7 @@ import { callChatGPT } from "./chatGPT/chatgpt";
 import { findOrCreateSpreadsheet } from "./spreadSheet/findOrCreateSpreadsheet";
 import { CallChatGPTPayload } from "./type/chatGPTTypes";
 import { spreadSheetMethod } from "./spreadSheet/spreadSheetMethod";
+import { sendMessage } from "./message/sendMessage";
 
 interface DoGetEvent {
   queryString: string;
@@ -24,16 +25,12 @@ interface DoPostEvent {
   parameters: Record<string, string[]>; // クエリパラメータの配列値
 }
 
-const propetiesService = PropertiesService;
-const scriptProperties = propetiesService.getScriptProperties();
-const ACCESS_TOKEN = scriptProperties.getProperty("LINE_CHANNEL_ACCESS_TOKEN");
-
 /**
  * テスト用の関数
  * @param e
  */
 function doGet(e: DoGetEvent) {
-  return findOrCreateSpreadsheet("default");
+  console.log("OK");
 }
 
 /**
@@ -62,29 +59,14 @@ function doPost(e: DoPostEvent) {
   const spreadsheet = findOrCreateSpreadsheet(id);
 
   const paymentData: CallChatGPTPayload[] = JSON.parse(chatGPTResponse);
-  spreadSheetMethod(spreadsheet, paymentData);
 
-  const url = "https://api.line.me/v2/bot/message/reply";
+  let valuesMap;
 
-  const payload = {
-    replyToken: replyToken,
-    messages: [
-      {
-        type: "text",
-        text: "こんにちは",
-      },
-    ],
-  };
+  if (Array.isArray(paymentData)) {
+    valuesMap = spreadSheetMethod(spreadsheet, paymentData);
+  } else {
+    valuesMap = spreadSheetMethod(spreadsheet, [paymentData]);
+  }
 
-  const options: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
-    method: "post",
-    headers: {
-      "Content-Type": "application/json; charset=UTF-8",
-      Authorization: "Bearer " + ACCESS_TOKEN,
-    },
-    payload: JSON.stringify(payload),
-  };
-
-  // ----- lineメッセージ送信 -----
-  UrlFetchApp.fetch(url, options);
+  sendMessage(replyToken, valuesMap);
 }

@@ -16,17 +16,17 @@ export function findOrCreateSpreadsheet(
   } else {
     // 見つからなかった場合、新しいスプレッドシートを作成
     spreadsheet = SpreadsheetApp.create(spreadsheetName);
-    const sheet = spreadsheet.getSheets()[0];
-    // A1 セルに 'from' を設定
-    sheet.getRange("A1").setValue("from");
-    // B1 セルに 'to' を設定
-    sheet.getRange("B1").setValue("to");
-    // C1 セルに 'money' を設定
-    sheet.getRange("C1").setValue("money");
-    // E1 セルに 'name' を設定
-    sheet.getRange("E1").setValue("name");
-    // F1 セルに 'balance' を設定（収支という意味）
-    sheet.getRange("F1").setValue("balance");
+    // const sheet = spreadsheet.getSheets()[0];
+    // // A1 セルに 'from' を設定
+    // sheet.getRange("A1").setValue("from");
+    // // B1 セルに 'to' を設定
+    // sheet.getRange("B1").setValue("to");
+    // // C1 セルに 'money' を設定
+    // sheet.getRange("C1").setValue("money");
+    // // E1 セルに 'name' を設定
+    // sheet.getRange("E1").setValue("name");
+    // // F1 セルに 'balance' を設定（収支という意味）
+    // sheet.getRange("F1").setValue("balance");
 
     Logger.log("新しいスプレッドシートを作成しました: " + spreadsheet.getUrl());
   }

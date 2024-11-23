@@ -18,7 +18,7 @@ export function callChatGPT(prompt: string): string {
       {
         role: "system",
         content:
-          "Please respond in JSON format at all times. The response should indicate who (From) paid how much (Money) to whom (To) in JSON format. If the names are provided in Japanese, please use them as they are without translation.",
+          "Please respond in JSON format at all times. The response should indicate who (From) paid how much (Money) to whom (To) in JSON format. If the names are provided in Japanese, please use them as they are without translation. For the Money field, please use numeric values only, without any currency symbols or units. Additionally, registered names will be provided, so please convert any variations of the names in the user prompt to the corresponding registered names before including them in the output.",
       },
       { role: "user", content: prompt },
     ],
