@@ -47,60 +47,83 @@ function doPost(e: DoPostEvent) {
 
   let id = "default";
 
-  // typeを判定して、idを取得
-  if (type === "user") {
-    id = event.source.userId ?? "default";
-  } else if (type === "group") {
-    id = event.source.groupId ?? "default";
-  } else if (type === "room") {
-    id = event.source.roomId ?? "default";
-  }
-
-  const spreadsheet = findSpreadsheet(id);
-
-  if (typeof spreadsheet === "string") {
-    const lineMessage =
-      "計算記録が見つかりません。計算を開始したければ、@計算開始 と送信してください。";
-    sendMessage(replyToken, lineMessage);
-    return;
-  }
-
-  // スプシを新規作成
-  if (request === "@計算開始") {
-    const lineMessage = "計算を開始します。";
-    SpreadsheetApp.create(id);
-    sendMessage(replyToken, lineMessage);
-    return;
-  }
-
-  if (request === "@リセット") {
-    const sheet = spreadsheet.getSheets()[0];
-
-    // 各シートの内容をすべてクリア（フォーマットは保持）
-    sheet.clear();
-  }
-
-  if (request === "@計算終了") {
-    let messageText = "";
-    const valuesMap = getValuesFromSpreadsheet(spreadsheet);
-    for (const [key, { value, index }] of valuesMap) {
-      messageText += `${value[0]}: ${value[1]}に${value[2]}円支払い \n`;
+  try {
+    // typeを判定して、idを取得
+    if (type === "user") {
+      id = event.source.userId ?? "default";
+    } else if (type === "group") {
+      id = event.source.groupId ?? "default";
+    } else if (type === "room") {
+      id = event.source.roomId ?? "default";
     }
+
+    const spreadsheet = findSpreadsheet(id);
+
+    if (typeof spreadsheet === "string") {
+      // スプシが存在しない場合
+      const lineMessage =
+        request === "@計算開始"
+          ? "計算を開始します。" // 計算開始の場合
+          : "計算記録が見つかりません。計算を開始したければ、@計算開始 と送信してください。"; // それ以外
+
+      if (request === "@計算開始") {
+        SpreadsheetApp.create(id); // スプシを新規作成
+      }
+
+      sendMessage(replyToken, lineMessage);
+      return;
+    }
+
+    if (request === "@計算開始") {
+      // スプシが既に存在する場合
+      const lineMessage =
+        "計算記録がすでに存在するため、新たに作成できません。";
+      sendMessage(replyToken, lineMessage);
+      return;
+    }
+
+    if (request === "@リセット") {
+      const sheet = spreadsheet.getSheets()[0];
+
+      // 各シートの内容をすべてクリア（フォーマットは保持）
+      sheet.clear();
+      const lineMessage = "正常にリセットされました。";
+      sendMessage(replyToken, lineMessage);
+    }
+
+    if (request === "@計算終了") {
+      let messageText = "";
+      const valuesMap = getValuesFromSpreadsheet(spreadsheet);
+      if (valuesMap.size === 0) {
+        const message = "記録がありません";
+        sendMessage(replyToken, message);
+        return;
+      }
+      for (const [key, { value, index }] of valuesMap) {
+        messageText += `${value[0]}: ${value[1]}に${value[2]}円支払い \n`;
+      }
+      // スプレッドシートを削除する
+      const file = DriveApp.getFileById(spreadsheet.getId());
+      file.setTrashed(true); // ファイルをゴミ箱に移動
+
+      sendMessage(replyToken, messageText);
+      return;
+    }
+
+    const chatGPTResponse = callChatGPT(request);
+    const paymentData: CallChatGPTPayload[] = JSON.parse(chatGPTResponse);
+
+    if (Array.isArray(paymentData)) {
+      spreadSheetMethod(spreadsheet, paymentData);
+    } else {
+      spreadSheetMethod(spreadsheet, [paymentData]);
+    }
+
+    const messageText =
+      "承りました。次の指示をどうぞ。計算を終了したければ @計算終了 と送信してください。";
+
     sendMessage(replyToken, messageText);
-    return;
+  } catch (e: any) {
+    sendMessage(replyToken, e.message);
   }
-
-  const chatGPTResponse = callChatGPT(request);
-  const paymentData: CallChatGPTPayload[] = JSON.parse(chatGPTResponse);
-
-  if (Array.isArray(paymentData)) {
-    spreadSheetMethod(spreadsheet, paymentData);
-  } else {
-    spreadSheetMethod(spreadsheet, [paymentData]);
-  }
-
-  const messageText =
-    "承りました。次の指示をどうぞ。計算を終了したければ @計算終了 と送信してください。";
-
-  sendMessage(replyToken, messageText);
 }

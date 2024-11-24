@@ -13,8 +13,9 @@ export function spreadSheetMethod(
 ) {
   const sheet = spreadsheet.getSheets()[0];
   // A列とB列のデータを全て取得
-  const range = sheet.getRange(1, 1, sheet.getLastRow(), 3); // A1からC列の最終行まで取得
-  const values = range.getValues(); // 二次元配列で取得される
+  const lastRow = sheet.getLastRow();
+  const values =
+    lastRow > 0 ? sheet.getRange(1, 1, lastRow, 3).getValues() : []; // A1からC列の最終行まで取得（空の場合は空の配列）
 
   // A列とB列の組み合わせをキーにして、Mapを作成
   const valuesMap = new Map(
@@ -60,7 +61,6 @@ export function spreadSheetMethod(
       if (payAmount === paidAmount) {
         sheet.getRange(paid.index + 1, 1, 1, 3).clear();
         valuesMap.delete(el.To + el.From);
-
         if (pay) {
           sheet.getRange(pay.index + 1, 1, 1, 3).clear();
           valuesMap.delete(el.From + el.To);
