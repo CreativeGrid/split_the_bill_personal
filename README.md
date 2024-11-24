@@ -54,4 +54,4 @@
 
 GAS へは Clasp を使用してデプロイを行なっており、プッシュ時は、TypeScript を JavaScript にビルドし、npm パッケージや他ファイルは rollup というバンドラを使用することで、最終的に全てメインファイルにまとめ、使用することができます。
 
-開発環境にとてもこだわっています。
+詳細は[テックブログ](https://zenn.dev/ritsumei_arupak/articles/522af3c807416a)でご確認ください。
