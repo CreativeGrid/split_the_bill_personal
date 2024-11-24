@@ -1,4 +1,4 @@
-# split_the_bill_personal V26.0
+# split_the_bill_personal v1.0
 
 ![DALL·E 2024-11-24 15 53 41 - A cute and friendly character designed for a chatbot context  The character should have big, adorable eyes, a gentle smile, and a soft, round design t](https://github.com/user-attachments/assets/044d6ed9-7361-4321-a102-f7bba8059b3c)
 
@@ -44,7 +44,7 @@
 
 
 ## バージョン
-現在V26.0でまだベータ版であるため、バグが発生する可能性があります。ご了承ください。
+現在v1.0でまだベータ版であるため、バグが発生する可能性があります。ご了承ください。
 
 
 
