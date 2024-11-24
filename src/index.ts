@@ -17,13 +17,13 @@ interface DoGetEvent {
 
 interface DoPostEvent {
   postData: {
-    contents: string; // リクエストボディの内容（例: JSON文字列）
-    length: number; // リクエストボディのバイト長
-    name: string; // データ名（ファイル名など）
-    type: string; // MIMEタイプ（例: "application/json"）
+    contents: string; // リクエストボディの内容（基本的にJSON文字列）
+    length: number;
+    name: string;
+    type: string;
   };
-  parameter: Record<string, string>; // クエリパラメータの単一値
-  parameters: Record<string, string[]>; // クエリパラメータの配列値
+  parameter: Record<string, string>;
+  parameters: Record<string, string[]>;
 }
 
 /**
@@ -48,7 +48,6 @@ function doPost(e: DoPostEvent) {
   let id = "default";
 
   try {
-    // typeを判定して、idを取得
     if (type === "user") {
       id = event.source.userId ?? "default";
     } else if (type === "group") {
@@ -63,7 +62,7 @@ function doPost(e: DoPostEvent) {
       // スプシが存在しない場合
       const lineMessage =
         request === "@計算開始"
-          ? "計算を開始します。" // 計算開始の場合
+          ? "計算を開始します。"
           : "計算記録が見つかりません。計算を開始したければ、@計算開始 と送信してください。"; // それ以外
 
       if (request === "@計算開始") {
@@ -104,7 +103,7 @@ function doPost(e: DoPostEvent) {
       }
       // スプレッドシートを削除する
       const file = DriveApp.getFileById(spreadsheet.getId());
-      file.setTrashed(true); // ファイルをゴミ箱に移動
+      file.setTrashed(true);
 
       sendMessage(replyToken, messageText);
       return;

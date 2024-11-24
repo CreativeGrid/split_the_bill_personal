@@ -12,10 +12,9 @@ export function spreadSheetMethod(
   paymentData: CallChatGPTPayload[]
 ) {
   const sheet = spreadsheet.getSheets()[0];
-  // A列とB列のデータを全て取得
   const lastRow = sheet.getLastRow();
   const values =
-    lastRow > 0 ? sheet.getRange(1, 1, lastRow, 3).getValues() : []; // A1からC列の最終行まで取得（空の場合は空の配列）
+    lastRow > 0 ? sheet.getRange(1, 1, lastRow, 3).getValues() : [];
 
   // A列とB列の組み合わせをキーにして、Mapを作成
   const valuesMap = new Map(
@@ -24,10 +23,10 @@ export function spreadSheetMethod(
 
   // 新しい行を追加する関数
   const createCell = (From: string, To: string, Money: string) => {
-    const lastRow = sheet.getLastRow() + 1; // 次に追加する行番号
-    sheet.getRange(lastRow, 1).setValue(From); // A列
-    sheet.getRange(lastRow, 2).setValue(To); // B列
-    sheet.getRange(lastRow, 3).setValue(Money); // C列
+    const lastRow = sheet.getLastRow() + 1;
+    sheet.getRange(lastRow, 1).setValue(From);
+    sheet.getRange(lastRow, 2).setValue(To);
+    sheet.getRange(lastRow, 3).setValue(Money);
     valuesMap.set(From + To, { value: [From, To, Money], index: lastRow - 1 });
   };
 
@@ -38,12 +37,12 @@ export function spreadSheetMethod(
     // 奢った記録も奢られた記録も存在しない場合、新しい行を追加
     if (!pay && !paid) {
       createCell(el.From, el.To, el.Money);
-      return; // 新しい行を追加したら次のループに進む
+      return;
     }
 
     // 奢った記録が存在する場合、値を更新
     if (pay) {
-      const currentMoney = Number(pay.value[2]) || 0; // 既存の値がない場合は 0 とする
+      const currentMoney = Number(pay.value[2]) || 0;
       const newMoney = currentMoney + Number(el.Money);
 
       // 値を更新
