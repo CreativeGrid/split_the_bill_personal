@@ -1,9 +1,10 @@
 import { LineEvent } from "./type/lineEvent";
 import { callChatGPT } from "./chatGPT/chatgpt";
-import { findOrCreateSpreadsheet } from "./spreadSheet/findOrCreateSpreadsheet";
 import { CallChatGPTPayload } from "./type/chatGPTTypes";
 import { spreadSheetMethod } from "./spreadSheet/spreadSheetMethod";
 import { sendMessage } from "./message/sendMessage";
+import { findSpreadsheet } from "./spreadSheet/findSpreadsheet";
+import { getValuesFromSpreadsheet } from "./spreadSheet/getValuesFromSpreadsheet";
 
 interface DoGetEvent {
   queryString: string;
@@ -41,7 +42,6 @@ function doPost(e: DoPostEvent) {
   const lineEvent: LineEvent = JSON.parse(e.postData.contents);
   const event = lineEvent.events[0];
   const request = event.message.text;
-  const chatGPTResponse = callChatGPT(request);
   const replyToken = event.replyToken;
   const type = event.source.type;
 
@@ -56,17 +56,51 @@ function doPost(e: DoPostEvent) {
     id = event.source.roomId ?? "default";
   }
 
-  const spreadsheet = findOrCreateSpreadsheet(id);
+  const spreadsheet = findSpreadsheet(id);
 
-  const paymentData: CallChatGPTPayload[] = JSON.parse(chatGPTResponse);
-
-  let valuesMap;
-
-  if (Array.isArray(paymentData)) {
-    valuesMap = spreadSheetMethod(spreadsheet, paymentData);
-  } else {
-    valuesMap = spreadSheetMethod(spreadsheet, [paymentData]);
+  if (typeof spreadsheet === "string") {
+    const lineMessage =
+      "計算記録が見つかりません。計算を開始したければ、@計算開始 と送信してください。";
+    sendMessage(replyToken, lineMessage);
+    return;
   }
 
-  sendMessage(replyToken, valuesMap);
+  // スプシを新規作成
+  if (request === "@計算開始") {
+    const lineMessage = "計算を開始します。";
+    SpreadsheetApp.create(id);
+    sendMessage(replyToken, lineMessage);
+    return;
+  }
+
+  if (request === "@リセット") {
+    const sheet = spreadsheet.getSheets()[0];
+
+    // 各シートの内容をすべてクリア（フォーマットは保持）
+    sheet.clear();
+  }
+
+  if (request === "@計算終了") {
+    let messageText = "";
+    const valuesMap = getValuesFromSpreadsheet(spreadsheet);
+    for (const [key, { value, index }] of valuesMap) {
+      messageText += `${value[0]}: ${value[1]}に${value[2]}円支払い \n`;
+    }
+    sendMessage(replyToken, messageText);
+    return;
+  }
+
+  const chatGPTResponse = callChatGPT(request);
+  const paymentData: CallChatGPTPayload[] = JSON.parse(chatGPTResponse);
+
+  if (Array.isArray(paymentData)) {
+    spreadSheetMethod(spreadsheet, paymentData);
+  } else {
+    spreadSheetMethod(spreadsheet, [paymentData]);
+  }
+
+  const messageText =
+    "承りました。次の指示をどうぞ。計算を終了したければ @計算終了 と送信してください。";
+
+  sendMessage(replyToken, messageText);
 }

@@ -93,5 +93,4 @@ export function spreadSheetMethod(
       }
     }
   });
-  return valuesMap;
 }

@@ -2,23 +2,15 @@ const propetiesService = PropertiesService;
 const scriptProperties = propetiesService.getScriptProperties();
 const ACCESS_TOKEN = scriptProperties.getProperty("LINE_CHANNEL_ACCESS_TOKEN");
 
-export function sendMessage(
-  replyToken: string,
-  valuesMap: Map<string, { value: any[]; index: number }>
-) {
+export function sendMessage(replyToken: string, message: string) {
   const url = "https://api.line.me/v2/bot/message/reply";
-
-  let messageText = "";
-  for (const [key, { value, index }] of valuesMap) {
-    messageText += `${value[0]}: ${value[1]}に${value[2]}円支払い \n`;
-  }
 
   const payload = {
     replyToken: replyToken,
     messages: [
       {
         type: "text",
-        text: `${messageText}`,
+        text: message,
       },
     ],
   };
