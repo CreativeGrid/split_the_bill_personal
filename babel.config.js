@@ -1,15 +1,17 @@
-module.exports = {
+import babelPresetEnv from "@babel/preset-env";
+import babelPresetTypescript from "@babel/preset-typescript";
+
+export default {
   presets: [
     [
-      // ES features necessary for user's Node version
-      require("@babel/preset-env").default,
+      babelPresetEnv,
       {
         targets: {
           node: "current",
         },
       },
     ],
-    [require("@babel/preset-typescript").default],
+    [babelPresetTypescript],
   ],
   plugins: ["@babel/plugin-transform-runtime"],
 };
